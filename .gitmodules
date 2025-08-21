@@ -1,0 +1,4 @@
+[submodule "external/fmtals"]
+	path = external/fmtals
+	url = https://github.com/adriensalon/fmtals.git
+	branch = master
