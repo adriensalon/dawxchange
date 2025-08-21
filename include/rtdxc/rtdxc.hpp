@@ -22,7 +22,13 @@ private:
     std::shared_ptr<struct session_impl> _impl;
 };
 
-struct file_watcher {
+struct watcher {
+
+
+};
+
+struct collection {
+
 
 
 };
@@ -31,13 +37,27 @@ struct session {
     session(const std::filesystem::path& program_path, const std::filesystem::path& working_directory);
     session(const std::filesystem::path& program_path, const std::filesystem::path& working_directory, const std::filesystem::path& project_path);
 
-    // ne fait rien, gere le processus tout seul
-
-    void on_save(const std::function<void(const dxc::project&)>& save_callback)
 
 private:
     process _process;
-    file_watcher _file_watcher;
+    watcher _watcher;
 };
+
+struct runtime {
+    
+
+private:
+    std::shared_ptr<session> _session;
+    collection _collection;
+};
+
+struct client {
+
+    void exit();
+
+private:
+    std::shared_ptr<struct client_impl> _impl;
+};
+
 
 }

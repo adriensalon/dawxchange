@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(imgui)
 
 set(imgui_source
@@ -10,7 +10,7 @@ set(imgui_source
 
 	"misc/cpp/imgui_stdlib.cpp"
 
-	"backends/imgui_impl_glfw.cpp"
+	# "backends/imgui_impl_glfw.cpp"
 	"backends/imgui_impl_opengl3.cpp"
 )
 
@@ -24,7 +24,7 @@ target_include_directories(imgui PUBLIC "backends/")
 target_include_directories(imgui PUBLIC "${CMAKE_CURRENT_LIST_DIR}")
 
 # link
-target_link_libraries(imgui glfw)
+# target_link_libraries(imgui glfw)
 
 # properties
 set_property(TARGET imgui PROPERTY CXX_STANDARD 17)
