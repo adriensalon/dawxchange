@@ -2,3 +2,7 @@
 	path = external/fmtals
 	url = https://github.com/adriensalon/fmtals.git
 	branch = master
+[submodule "external/fmtdxc"]
+	path = external/fmtdxc
+	url = https://github.com/adriensalon/fmtdxc.git
+	branch = master
