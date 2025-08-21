@@ -8,6 +8,7 @@ option(RTALS_BUILD_UI "Build the ui executable" ON)
 set(FMTALS_BUILD_DEMO OFF)
 set(FMTALS_BUILD_TOOL OFF)
 add_subdirectory(external/fmtals)
+add_subdirectory(external/fmtdxc)
 set(rtals_source
     source/client.cpp
     source/process.cpp
