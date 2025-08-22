@@ -10,6 +10,7 @@ set(FMTALS_BUILD_DEMO OFF)
 set(FMTALS_BUILD_TOOL OFF)
 add_subdirectory(external/fmtals)
 set(rtals_source
+    source/convert/als.cpp
     source/process.cpp
     source/runtime.cpp
     source/session.cpp

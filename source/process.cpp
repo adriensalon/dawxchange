@@ -257,7 +257,7 @@ static bool wait_process_exit(HANDLE h, DWORD timeout_ms)
     return h && WaitForSingleObject(h, timeout_ms) == WAIT_OBJECT_0;
 }
 
-namespace dxc {
+namespace rtdxc {
 namespace detail {
 
 struct session_impl {
@@ -267,8 +267,10 @@ struct session_impl {
     bool is_project_loaded = false;
 };
 
-process::process(const std::filesystem::path& program)
+process::process(const fmtals::version als_version, const std::filesystem::path& program)
 {
+    (void)als_version;
+    
     _impl = std::make_shared<session_impl>();
     std::wstring _command_line = L"\"" + program.wstring() + L"\"";
     STARTUPINFOW _startup_info = { sizeof(_startup_info) };
