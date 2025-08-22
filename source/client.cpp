@@ -1,2 +1,0 @@
-#include <rtdxc/rtdxc.hpp>
-

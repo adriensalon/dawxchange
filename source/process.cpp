@@ -258,6 +258,7 @@ static bool wait_process_exit(HANDLE h, DWORD timeout_ms)
 }
 
 namespace dxc {
+namespace detail {
 
 struct session_impl {
     HWND main_window = nullptr;
@@ -340,10 +341,10 @@ process::~process() noexcept
     _impl->process_handle = nullptr;
 }
 
-void process::load_project(const std::filesystem::path& project)
+void process::load_native_project(const std::filesystem::path& project)
 {
     if (_impl->is_project_loaded) {
-        save_project();
+        save_native_project();
     }
 
     SetForegroundWindow(_impl->main_window);
@@ -381,7 +382,7 @@ void process::load_project(const std::filesystem::path& project)
     std::cout << "Requested open: " << project << std::endl;
 }
 
-void process::save_project()
+void process::save_native_project()
 {
     SetForegroundWindow(_impl->main_window);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -390,7 +391,7 @@ void process::save_project()
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 }
 
-void process::save_project_as(const std::filesystem::path& project)
+void process::save_native_project_as(const std::filesystem::path& project)
 {
     SetForegroundWindow(_impl->main_window);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -423,4 +424,5 @@ void process::save_project_as(const std::filesystem::path& project)
     }
 }
 
+}
 }
