@@ -101,20 +101,30 @@ namespace detail {
         fmtals::project als {}; // value-init → zero-initialize mandatory scalars
 
         // Minimal project metadata
-        als.creator = "fmtdxc";
-        als.major_version = "12";
-        als.minor_version = "0";
-        als.revision = "0";
+        als.creator = "Ableton Live 9.7.7";
+        als.major_version = "4";
+        als.minor_version = "9.5_327";
+        als.revision = "b058f6a52c6e149afdf06c8bc279a5c7851f1832";
 
         // Master track naming (cosmetic)
         als.project_master_track.effective_name = "Master";
         als.project_master_track.user_name = "Master";
+        als.project_master_track.color = 7;
+        als.project_master_track.color_index = 7;
+
+        // Master track naming (cosmetic)
+        als.project_prehear_track.effective_name = "PreHear";
+        als.project_prehear_track.user_name = "PreHear";
+        als.project_prehear_track.color = 7;
+        als.project_prehear_track.color_index = 7;
 
         // fmtdxc audio sequencers → ALS audio tracks
         for (const auto& [asid, as] : proj.audio_sequencers) {
             fmtals::project::audio_track at {};
             at.effective_name = as.name;
             at.user_name = as.name;
+            at.color = 7;
+            at.color_index = 7;
 
             // clips
             for (const auto& [cid, c] : as.clips) {
@@ -139,8 +149,17 @@ namespace detail {
             fmtals::project::midi_track mt {};
             mt.effective_name = ms.name;
             mt.user_name = ms.name;
+            mt.color = 7;
+            mt.color_index = 7;
             als.tracks.push_back(std::move(mt));
         }
+
+        als.transport_computer_keyboard_is_enabled = false;
+        als.view_state_launch_panel = false;
+        als.view_state_envelope_panel = false;
+        als.view_state_sample_panel = true;
+        als.content_splitter_properties_open = true;
+        als.content_splitter_properties_size = 55;
 
         // Return/Group/Return tracks: not synthesized in this minimal bridge.
 

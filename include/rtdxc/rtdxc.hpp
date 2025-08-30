@@ -73,10 +73,13 @@ namespace detail {
     };
 }
 
+/// @brief
+using daw_version = std::variant<fmtals::version, int>;
+
 /// @brief launches process on it and on modification updates sparse diff
 struct session {
     session() = delete;
-    session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path);
+    session(const daw_version version, const std::filesystem::path& daw_path, const std::filesystem::path& container_path);
     session(const session& other) = delete;
     session& operator=(const session& other) = delete;
     session(session&& other) = default;
@@ -113,7 +116,7 @@ struct p2p_connexion {
 /// @brief
 struct p2p_session {
     p2p_session() = delete;
-    p2p_session(const std::filesystem::path& native_program_path, const fmtdxc::project_container& container, const p2p_connexion& connexion);
+    p2p_session(const daw_version version, const std::filesystem::path& daw_path, const fmtdxc::project_container& container, const p2p_connexion& connexion);
     p2p_session(const p2p_session& other) = delete;
     p2p_session& operator=(const p2p_session& other) = delete;
     p2p_session(p2p_session&& other) = default;
@@ -138,9 +141,19 @@ struct runtime {
     runtime& operator=(runtime&& other) = default;
 
     [[nodiscard]] bool is_session_open() const;
-    session& open_linked_session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path); // open (REQ)
-    session& open_temp_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new
-    session& open_temp_session_from_template(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new from template (REQ)
+    session& open_linked_session(
+        const daw_version version, 
+        const std::filesystem::path& daw_path, 
+        const std::filesystem::path& container_path); // open (REQ)
+    session& open_temp_session(
+        const daw_version version, 
+        const std::filesystem::path& daw_path, 
+        const std::function<std::optional<std::filesystem::path>()>& close_callback); // new
+    session& open_temp_session_from_template(
+        const daw_version version, 
+        const std::filesystem::path& daw_path, 
+        const std::filesystem::path& container_path, 
+        const std::function<std::optional<std::filesystem::path>()>& close_callback); // new from template (REQ)
     // void open_linked_p2p_host_session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path); // open as p2p host (REQ)
     // void open_temp_p2p_host_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new as p2p host
     // void open_temp_p2p_client_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // join as p2p client

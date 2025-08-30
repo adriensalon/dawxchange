@@ -748,7 +748,7 @@ int APIENTRY wmain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
                 
                 static std::filesystem::path _container_path = "C:/Users/adri/Desktop/untitled.dxcc";
                 if (ImGui::Button("Open")) {
-                    _runtime.open_linked_session(_ableton_path, _container_path);
+                    _runtime.open_linked_session(fmtals::version::v_9_0_0, _ableton_path, _container_path);
                 }
 
                 ImGui::End();

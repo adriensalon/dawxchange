@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     // }
 
     std::filesystem::path _als_path("C:/Users/adri/Desktop/Untitled.als");
-    std::filesystem::path _dxcc_path("C:/Users/adri/Desktop/untitled.json");
+    std::filesystem::path _dxcc_path("C:/Users/adri/Desktop/untitled.dxcc");
 
     std::ifstream _als_stream(_als_path, std::ios::binary);
     std::ofstream _dxcc_stream(_dxcc_path, std::ios::binary);
