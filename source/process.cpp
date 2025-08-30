@@ -260,24 +260,22 @@ static bool wait_process_exit(HANDLE h, DWORD timeout_ms)
 namespace rtdxc {
 namespace detail {
 
-struct session_impl {
+struct process_impl {
     HWND main_window = nullptr;
     HANDLE process_handle = nullptr;
     DWORD process_id = 0;
     bool is_project_loaded = false;
 };
 
-process::process(const fmtals::version als_version, const std::filesystem::path& program)
-{
-    (void)als_version;
-    
-    _impl = std::make_shared<session_impl>();
-    std::wstring _command_line = L"\"" + program.wstring() + L"\"";
+process::process(const std::filesystem::path& native_program_path)
+{    
+    _impl = std::make_shared<process_impl>();
+    std::wstring _command_line = L"\"" + native_program_path.wstring() + L"\"";
     STARTUPINFOW _startup_info = { sizeof(_startup_info) };
     PROCESS_INFORMATION _process_information {};
 
-    if (!CreateProcessW(program.c_str(), _command_line.data(), NULL, NULL, FALSE, 0, NULL, NULL, &_startup_info, &_process_information)) {
-        std::wcerr << L"Failed to start process: " << program << L"\n";
+    if (!CreateProcessW(native_program_path.c_str(), _command_line.data(), NULL, NULL, FALSE, 0, NULL, NULL, &_startup_info, &_process_information)) {
+        std::wcerr << L"Failed to start process: " << native_program_path << L"\n";
         return;
     }
     _impl->process_handle = _process_information.hProcess; // keep it for the dtor

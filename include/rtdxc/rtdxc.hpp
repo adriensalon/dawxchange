@@ -3,12 +3,13 @@
 #include <fmtals/fmtals.hpp>
 #include <fmtdxc/fmtdxc.hpp>
 
-#include <filesystem>
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace rtdxc {
+
 namespace detail {
 
     /// @brief
@@ -24,19 +25,20 @@ namespace detail {
     /// @brief
     struct process {
         process() = delete;
-        process(const fmtals::version als_version, const std::filesystem::path& als_program_path);
+        process(const std::filesystem::path& native_program_path);
         process(const process& other) = delete;
         process& operator=(const process& other) = delete;
         process(process&& other) = default;
         process& operator=(process&& other) = default;
         ~process() noexcept;
 
+        [[nodiscard]] bool is_terminated() const;
         void load_native_project(const std::filesystem::path& native_project_path);
         void save_native_project();
         void save_native_project_as(const std::filesystem::path& native_project_path);
 
     private:
-        std::shared_ptr<struct session_impl> _impl;
+        std::shared_ptr<struct process_impl> _impl;
     };
 
     /// @brief
@@ -65,34 +67,40 @@ namespace detail {
         void on_modification(const std::function<void(const std::filesystem::path& file_path)>& callback);
         void on_creation(const std::function<void(const std::filesystem::path& file_path)>& callback);
         void on_removal(const std::function<void(const std::filesystem::path& file_path)>& callback);
-        
+
     private:
         std::shared_ptr<struct directory_watcher_impl> _impl;
     };
 }
 
-/// @brief
+/// @brief launches process on it and on modification updates sparse diff
 struct session {
     session() = delete;
-    session(const fmtals::version als_version, const std::filesystem::path& als_program_path, const fmtdxc::project_container& container);
+    session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path);
     session(const session& other) = delete;
     session& operator=(const session& other) = delete;
     session(session&& other) = default;
     session& operator=(session&& other) = default;
+    ~session();
 
+    [[nodiscard]] bool is_terminated() const;
     [[nodiscard]] bool can_undo() const;
     [[nodiscard]] bool can_redo() const;
     [[nodiscard]] std::size_t get_applied_count() const;
     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
+    [[nodiscard]] const fmtdxc::project_info& get_info() const;
     void commit(const std::string& message);
     void undo();
     void redo();
-
+    
 private:
-    std::filesystem::path _working_directory;
+    bool _is_terminated;
+    std::function<std::filesystem::path()> _close_callback;
     fmtdxc::project_container _project_container;
-    fmtdxc::sparse_project _next_project_diff;
+    std::variant<fmtals::version> _native_version;
+    std::filesystem::path _working_directory;
+    fmtdxc::sparse_project _next_project_diff; // for ui
     fmtdxc::project _next_project;
     detail::process _process;
     detail::file_watcher _watcher;
@@ -105,7 +113,7 @@ struct p2p_connexion {
 /// @brief
 struct p2p_session {
     p2p_session() = delete;
-    p2p_session(const fmtals::version als_version, const std::filesystem::path& als_program_path, const fmtdxc::project_container& container, const p2p_connexion& connexion);
+    p2p_session(const std::filesystem::path& native_program_path, const fmtdxc::project_container& container, const p2p_connexion& connexion);
     p2p_session(const p2p_session& other) = delete;
     p2p_session& operator=(const p2p_session& other) = delete;
     p2p_session(p2p_session&& other) = default;
@@ -122,54 +130,36 @@ private:
 };
 
 /// @brief
-struct collection {
-
-    collection(const std::filesystem::path& root_directory);
-
-    using project_id = std::uint64_t;
-
-    enum struct sort_field {
-        name,
-        created,
-        last_modified,
-        ppq,
-        commits_applied,
-    };
-
-    [[nodiscard]] const fmtdxc::project_info& at(const project_id index);
-    void sort(const sort_field& field);
-    void sort(const std::initializer_list<sort_field>& fields);
-    void foreach (const std::function<void(const project_id, const fmtdxc::project_info&)>& callback);
-    void reset(const std::vector<std::filesystem::path>& roots);
-
-private:
-    detail::directory_watcher _watcher;
-    std::vector<std::filesystem::path> _roots;
-    std::map<project_id, fmtdxc::project_info> _infos;
-};
-
-/// @brief
 struct runtime {
-    runtime(const std::filesystem::path& root_directory);
+    runtime();
+    runtime(const runtime& other) = delete;
+    runtime& operator=(const runtime& other) = delete;
+    runtime(runtime&& other) = default;
+    runtime& operator=(runtime&& other) = default;
 
-    [[nodiscard]] const collection& get_collection() const;
-    [[nodiscard]] std::vector<collection::project_id> get_open_sessions();
-    [[nodiscard]] std::vector<collection::project_id> get_open_p2p_sessions();
-    [[nodiscard]] const session& open_session_as_als();
-    [[nodiscard]] const session& open_session_as_flp();
-    [[nodiscard]] const session& open_session_as_als(const collection::project_id id);
-    [[nodiscard]] const session& open_session_as_flp(const collection::project_id id);
-    [[nodiscard]] const p2p_session& open_p2p_session_as_als(const collection::project_id id, const p2p_connexion connexion);
-    [[nodiscard]] const p2p_session& open_p2p_session_as_flp(const collection::project_id id, const p2p_connexion connexion);
-    void close_session(const collection::project_id id);
-    void close_p2p_session(const collection::project_id id);
-    collection::project_id import_project_from_als(const std::filesystem::path& native_project_path, fmtals::version& ver);
-    void export_project_to_als(const std::size_t id, const std::filesystem::path& native_project_path, const fmtals::version ver);
-
+    [[nodiscard]] bool is_session_open() const;
+    session& open_linked_session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path); // open (REQ)
+    session& open_temp_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new
+    session& open_temp_session_from_template(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new from template (REQ)
+    // void open_linked_p2p_host_session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path); // open as p2p host (REQ)
+    // void open_temp_p2p_host_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new as p2p host
+    // void open_temp_p2p_client_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // join as p2p client
+    void close_session();
+    
 private:
-    collection _collection;
-    std::unordered_map<collection::project_id, session> _sessions;
-    std::unordered_map<collection::project_id, p2p_session> _p2p_sessions;
+    std::unique_ptr<session> _session;
+    std::unique_ptr<p2p_session> _p2p_session;
 };
 
 }
+
+// import
+// export (REQ)
+// new
+//      new
+//      new from template (REQ)
+//      new as p2p host
+//      join as p2p client
+// open
+//      open (REQ)
+//      open as p2p host (REQ)
