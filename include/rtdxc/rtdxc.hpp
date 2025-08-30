@@ -81,7 +81,7 @@ struct session {
     session& operator=(const session& other) = delete;
     session(session&& other) = default;
     session& operator=(session&& other) = default;
-    ~session();
+    //~session();
 
     [[nodiscard]] bool is_terminated() const;
     [[nodiscard]] bool can_undo() const;
