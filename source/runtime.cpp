@@ -4,7 +4,7 @@ namespace rtdxc {
 
 runtime::runtime()
     : _session(nullptr)
-    , _p2p_session(nullptr)
+    // , _p2p_session(nullptr)
 {
 }
 
@@ -18,19 +18,21 @@ session& runtime::open_linked_session(
     const std::filesystem::path& daw_path,
     const std::filesystem::path& container_path)
 {
-    _session = std::make_unique<session>(version, daw_path, container_path);
+    _session = std::make_unique<session>(version, daw_path, container_path, [container_path] () {
+        return container_path;
+    });
     return *(_session.get());
 }
 
-// session& runtime::open_temp_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback)
+// session& runtime::open_temp_session(const std::filesystem::path& daw_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback)
 // {
-//     _session = std::make_unique<session>(native_program_path, close_callback);
+//     _session = std::make_unique<session>(daw_program_path, close_callback);
 //     return *(_session.get());
 // }
 //
-// session& runtime::open_temp_session_from_template(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path, const std::function<std::optional<std::filesystem::path>()>& close_callback)
+// session& runtime::open_temp_session_from_template(const std::filesystem::path& daw_program_path, const std::filesystem::path& container_path, const std::function<std::optional<std::filesystem::path>()>& close_callback)
 // {
-//     _session = std::make_unique<session>(native_program_path, container_path, close_callback);
+//     _session = std::make_unique<session>(daw_program_path, container_path, close_callback);
 //     return *(_session.get());
 // }
 

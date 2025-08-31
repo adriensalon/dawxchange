@@ -5,37 +5,35 @@
 
 #include <functional>
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace rtdxc {
 
 namespace detail {
 
     /// @brief
-    /// @param native_project
+    /// @param daw_project
     /// @return
-    [[nodiscard]] fmtdxc::project convert_from_als(const fmtals::project& native_project);
+    [[nodiscard]] fmtdxc::project convert_from_als(const fmtals::project& daw_project);
 
     /// @brief
-    /// @param native_project
+    /// @param daw_project
     /// @return
     [[nodiscard]] fmtals::project convert_to_als(const fmtdxc::project& proj);
 
     /// @brief
     struct process {
         process() = delete;
-        process(const std::filesystem::path& native_program_path);
+        process(const std::filesystem::path& daw_path);
         process(const process& other) = delete;
         process& operator=(const process& other) = delete;
         process(process&& other) = default;
         process& operator=(process&& other) = default;
         ~process() noexcept;
 
-        [[nodiscard]] bool is_terminated() const;
-        void load_native_project(const std::filesystem::path& native_project_path);
-        void save_native_project();
-        void save_native_project_as(const std::filesystem::path& native_project_path);
+        void on_exit(const std::function<void()>& exit_callback); // TODO
+        void load_daw_project(const std::filesystem::path& daw_project_path);
+        void save_daw_project();
+        void save_daw_project_as(const std::filesystem::path& daw_project_path);
 
     private:
         std::shared_ptr<struct process_impl> _impl;
@@ -79,34 +77,38 @@ using daw_version = std::variant<fmtals::version, int>;
 /// @brief launches process on it and on modification updates sparse diff
 struct session {
     session() = delete;
-    session(const daw_version version, const std::filesystem::path& daw_path, const std::filesystem::path& container_path);
+    session(
+        const daw_version version, 
+        const std::filesystem::path& daw_path, 
+        const std::filesystem::path& container_path, 
+        const std::function<std::optional<std::filesystem::path>()>& exit_callback);
     session(const session& other) = delete;
     session& operator=(const session& other) = delete;
     session(session&& other) = default;
     session& operator=(session&& other) = default;
-    //~session();
 
-    [[nodiscard]] bool is_terminated() const;
-    [[nodiscard]] bool can_undo() const;
-    [[nodiscard]] bool can_redo() const;
-    [[nodiscard]] std::size_t get_applied_count() const;
+    [[nodiscard]] bool can_commit() const;    
+    [[nodiscard]] bool can_undo() const;    
+    [[nodiscard]] bool can_redo() const;    
+    [[nodiscard]] std::size_t get_applied_count() const;    
     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
     [[nodiscard]] const fmtdxc::project_info& get_info() const;
+    [[nodiscard]] const std::filesystem::path& get_temp_directory_path() const;
     void commit(const std::string& message);
     void undo();
     void redo();
     
 private:
-    bool _is_terminated;
-    std::function<std::filesystem::path()> _close_callback;
-    fmtdxc::project_container _project_container;
-    std::variant<fmtals::version> _native_version;
-    std::filesystem::path _working_directory;
-    fmtdxc::sparse_project _next_project_diff; // for ui
-    fmtdxc::project _next_project;
-    detail::process _process;
-    detail::file_watcher _watcher;
+    daw_version _daw_version;
+    std::filesystem::path _temp_directory_path;
+    fmtdxc::project_container _container;
+    fmtdxc::project_info _info;
+    fmtdxc::sparse_project _next_diff; // for ui
+    fmtdxc::project _next_proj;
+    std::unique_ptr<detail::process> _daw_process;
+    std::unique_ptr<detail::file_watcher> _daw_temp_project_watcher;
+    friend struct runtime;
 };
 
 struct p2p_connexion {
@@ -114,23 +116,23 @@ struct p2p_connexion {
 };
 
 /// @brief
-struct p2p_session {
-    p2p_session() = delete;
-    p2p_session(const daw_version version, const std::filesystem::path& daw_path, const fmtdxc::project_container& container, const p2p_connexion& connexion);
-    p2p_session(const p2p_session& other) = delete;
-    p2p_session& operator=(const p2p_session& other) = delete;
-    p2p_session(p2p_session&& other) = default;
-    p2p_session& operator=(p2p_session&& other) = default;
+// struct p2p_session {
+//     p2p_session() = delete;
+//     p2p_session(const daw_version version, const std::filesystem::path& daw_path, const fmtdxc::project_container& container, const p2p_connexion& connexion);
+//     p2p_session(const p2p_session& other) = delete;
+//     p2p_session& operator=(const p2p_session& other) = delete;
+//     p2p_session(p2p_session&& other) = default;
+//     p2p_session& operator=(p2p_session&& other) = default;
 
-    [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
-    [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
-    [[nodiscard]] const p2p_connexion& get_connexion() const;
-    void commit(const std::string& message);
+//     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
+//     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
+//     [[nodiscard]] const p2p_connexion& get_connexion() const;
+//     void commit(const std::string& message);
 
-private:
-    session _session;
-    p2p_connexion _connexion;
-};
+// private:
+//     session _session;
+//     p2p_connexion _connexion;
+// };
 
 /// @brief
 struct runtime {
@@ -141,27 +143,32 @@ struct runtime {
     runtime& operator=(runtime&& other) = default;
 
     [[nodiscard]] bool is_session_open() const;
+
     session& open_linked_session(
         const daw_version version, 
         const std::filesystem::path& daw_path, 
         const std::filesystem::path& container_path); // open (REQ)
-    session& open_temp_session(
+
+    [[nodiscard]] session& open_temp_session(
         const daw_version version, 
         const std::filesystem::path& daw_path, 
         const std::function<std::optional<std::filesystem::path>()>& close_callback); // new
-    session& open_temp_session_from_template(
+    
+    [[nodiscard]] session& open_temp_session_from_template(
         const daw_version version, 
         const std::filesystem::path& daw_path, 
         const std::filesystem::path& container_path, 
         const std::function<std::optional<std::filesystem::path>()>& close_callback); // new from template (REQ)
-    // void open_linked_p2p_host_session(const std::filesystem::path& native_program_path, const std::filesystem::path& container_path); // open as p2p host (REQ)
-    // void open_temp_p2p_host_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new as p2p host
-    // void open_temp_p2p_client_session(const std::filesystem::path& native_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // join as p2p client
+    
+    // void open_linked_p2p_host_session(const std::filesystem::path& daw_program_path, const std::filesystem::path& container_path); // open as p2p host (REQ)
+    // void open_temp_p2p_host_session(const std::filesystem::path& daw_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // new as p2p host
+    // void open_temp_p2p_client_session(const std::filesystem::path& daw_program_path, const std::function<std::optional<std::filesystem::path>()>& close_callback); // join as p2p client
+    
     void close_session();
     
 private:
     std::unique_ptr<session> _session;
-    std::unique_ptr<p2p_session> _p2p_session;
+    // std::unique_ptr<p2p_session> _p2p_session;
 };
 
 }

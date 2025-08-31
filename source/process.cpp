@@ -267,15 +267,15 @@ struct process_impl {
     bool is_project_loaded = false;
 };
 
-process::process(const std::filesystem::path& native_program_path)
+process::process(const std::filesystem::path& daw_program_path)
 {    
     _impl = std::make_shared<process_impl>();
-    std::wstring _command_line = L"\"" + native_program_path.wstring() + L"\"";
+    std::wstring _command_line = L"\"" + daw_program_path.wstring() + L"\"";
     STARTUPINFOW _startup_info = { sizeof(_startup_info) };
     PROCESS_INFORMATION _process_information {};
 
-    if (!CreateProcessW(native_program_path.c_str(), _command_line.data(), NULL, NULL, FALSE, 0, NULL, NULL, &_startup_info, &_process_information)) {
-        std::wcerr << L"Failed to start process: " << native_program_path << L"\n";
+    if (!CreateProcessW(daw_program_path.c_str(), _command_line.data(), NULL, NULL, FALSE, 0, NULL, NULL, &_startup_info, &_process_information)) {
+        std::wcerr << L"Failed to start process: " << daw_program_path << L"\n";
         return;
     }
     _impl->process_handle = _process_information.hProcess; // keep it for the dtor
@@ -341,10 +341,10 @@ process::~process() noexcept
     _impl->process_handle = nullptr;
 }
 
-void process::load_native_project(const std::filesystem::path& project)
+void process::load_daw_project(const std::filesystem::path& project)
 {
     if (_impl->is_project_loaded) {
-        save_native_project();
+        save_daw_project();
     }
 
     SetForegroundWindow(_impl->main_window);
@@ -382,7 +382,7 @@ void process::load_native_project(const std::filesystem::path& project)
     std::cout << "Requested open: " << project << std::endl;
 }
 
-void process::save_native_project()
+void process::save_daw_project()
 {
     SetForegroundWindow(_impl->main_window);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -391,7 +391,7 @@ void process::save_native_project()
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 }
 
-void process::save_native_project_as(const std::filesystem::path& project)
+void process::save_daw_project_as(const std::filesystem::path& project)
 {
     SetForegroundWindow(_impl->main_window);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
