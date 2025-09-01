@@ -22,6 +22,11 @@
 #define APP_USE_VULKAN_DEBUG_REPORT
 #endif
 
+#include "collection.hpp"
+#include "controls.hpp"
+#include "core/teelog.hpp"
+#include "settings.hpp"
+
 static rtdxc::runtime _runtime;
 
 // Data
@@ -339,6 +344,16 @@ static int ImGui_ImplWin32_CreateVkSurface(ImGuiViewport* viewport, ImU64 vk_ins
     return (int)vkCreateWin32SurfaceKHR((VkInstance)vk_instance, &createInfo, (VkAllocationCallbacks*)vk_allocator, (VkSurfaceKHR*)out_vk_surface);
 }
 
+static void log_sink(const char* data, size_t n, void* user)
+{
+    teelog_ring* _ring = static_cast<teelog_ring*>(user);
+    if (n && data[n - 1] == '\n') {
+        _ring->push_line(std::string(data, n - 1));
+    } else {
+        _ring->push_line(std::string(data, n));
+    }
+}
+
 int main(int, char**)
 {
     // Create application window
@@ -432,6 +447,11 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf");
     //IM_ASSERT(font != nullptr);
 
+    load_settings();
+    teelog_ring _teelog_ring;
+    teelog _teelog;
+    _teelog.install(log_sink, &_teelog_ring);
+
     // Main loop
     bool done = false;
     while (!done) {
@@ -452,44 +472,9 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
-        {
-            // settings window
-        }
-
-        {
-            // collection window
-        }
-
-        {
-            // details window
-        }
-
-        {
-            static std::filesystem::path _ableton_path = "C:/ProgramData/Ableton/Live 9 Standard/Program/Ableton Live 9 Standard.exe";
-
-            // Example UI (empty + optional demo)
-            ImGui::Begin("dawxchange window");
-
-            if (ImGui::Button("Import")) {
-            }
-            ImGui::SameLine();
-
-            if (ImGui::Button("Export")) {
-            }
-            ImGui::SameLine();
-
-            if (ImGui::Button("New")) {
-            }
-            ImGui::SameLine();
-
-            static std::filesystem::path _container_path = "C:/Users/adri/Desktop/untitled.dxcc";
-            if (ImGui::Button("Open")) {
-                _runtime.open_linked_session(fmtals::version::v_9_0_0, _ableton_path, _container_path);
-            }
-
-            ImGui::End();
-        }
+        draw_settings();
+        draw_controls();
+        draw_collection();
 
         ImGui::Render();
 
@@ -512,6 +497,9 @@ int main(int, char**)
         if (!main_is_minimized)
             FramePresent(wd);
     }
+
+    save_settings();
+    _teelog.uninstall();
 
     // Cleanup
     err = vkDeviceWaitIdle(g_Device);
