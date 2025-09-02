@@ -133,8 +133,8 @@ void draw_initial_daw_program_modal()
     const float width = 480.0f; // fixed modal width
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(width, 0.0f), ImGuiCond_Appearing);
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(width, 0.0f), ImGuiCond_Always);
     ImGui::SetNextWindowSizeConstraints(ImVec2(width, 0.0f), ImVec2(width, FLT_MAX));
 
     if (ImGui::BeginPopupModal(select_daw_program_modal_id, nullptr,

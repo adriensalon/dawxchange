@@ -449,8 +449,7 @@ int main(int, char**)
 
     load_settings();
     teelog_ring _teelog_ring;
-    teelog _teelog;
-    _teelog.install(log_sink, &_teelog_ring);
+    teelog_install(log_sink, &_teelog_ring);
 
     // Main loop
     bool done = false;
@@ -499,7 +498,7 @@ int main(int, char**)
     }
 
     save_settings();
-    _teelog.uninstall();
+    teelog_uninstall();
 
     // Cleanup
     err = vkDeviceWaitIdle(g_Device);

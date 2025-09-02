@@ -2,12 +2,11 @@
 
 #include <deque>
 #include <functional>
-#include <mutex>
 #include <iostream>
+#include <mutex>
 #include <streambuf>
 #include <string>
 #include <vector>
-
 
 struct teelog_ring {
     std::mutex lock_mutex;
@@ -19,11 +18,7 @@ struct teelog_ring {
     void clear();
 };
 
-struct teelog {
-    void install(const std::function<void(const char*, std::size_t, void*)>& sink, void* user);
-    void uninstall();
+void teelog_install(const std::function<void(const char*, std::size_t, void*)>& sink, void* user);
+void teelog_uninstall();
 
-private:
-    std::streambuf* old_buffer = nullptr;
-    struct teelog_buffer* buffer = nullptr;
-};
+

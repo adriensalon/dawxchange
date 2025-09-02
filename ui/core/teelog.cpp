@@ -92,7 +92,10 @@ private:
     std::string linebuf_;
 };
 
-void teelog::install(const std::function<void(const char*, std::size_t, void*)>& sink, void* user)
+static std::streambuf* old_buffer = nullptr;
+static teelog_buffer* buffer;
+
+void teelog_install(const std::function<void(const char*, std::size_t, void*)>& sink, void* user)
 {
     if (buffer)
         return;
@@ -102,7 +105,7 @@ void teelog::install(const std::function<void(const char*, std::size_t, void*)>&
     std::clog.rdbuf(buffer);
 }
 
-void teelog::uninstall()
+void teelog_uninstall()
 {
     if (!buffer)
         return;
@@ -111,3 +114,4 @@ void teelog::uninstall()
     buffer = nullptr;
     old_buffer = nullptr;
 }
+
