@@ -27,8 +27,8 @@ namespace detail {
         process(const std::filesystem::path& daw_path);
         process(const process& other) = delete;
         process& operator=(const process& other) = delete;
-        process(process&& other) = default;
-        process& operator=(process&& other) = default;
+        process(process&& other) noexcept = default;
+        process& operator=(process&& other) noexcept = default;
         ~process() noexcept;
 
         void on_exit(const std::function<void()>& exit_callback); // TODO
@@ -46,8 +46,8 @@ namespace detail {
         file_watcher(const std::filesystem::path& file_path);
         file_watcher(const file_watcher& other) = delete;
         file_watcher& operator=(const file_watcher& other) = delete;
-        file_watcher(file_watcher&& other) = default;
-        file_watcher& operator=(file_watcher&& other) = default;
+        file_watcher(file_watcher&& other) noexcept = default;
+        file_watcher& operator=(file_watcher&& other) noexcept = default;
 
         void on_modification(const std::function<void(const std::filesystem::path& file_path)>& callback);
 
@@ -61,8 +61,8 @@ namespace detail {
         directory_watcher(const std::filesystem::path& directory_path);
         directory_watcher(const directory_watcher& other) = delete;
         directory_watcher& operator=(const directory_watcher& other) = delete;
-        directory_watcher(directory_watcher&& other) = default;
-        directory_watcher& operator=(directory_watcher&& other) = default;
+        directory_watcher(directory_watcher&& other) noexcept = default;
+        directory_watcher& operator=(directory_watcher&& other) noexcept = default;
 
         void on_modification(const std::function<void(const std::filesystem::path& file_path)>& callback);
         void on_creation(const std::function<void(const std::filesystem::path& file_path)>& callback);
@@ -72,6 +72,7 @@ namespace detail {
         std::shared_ptr<struct directory_watcher_impl> _impl;
     };
 
+    /// @brief
     struct p2p_peer_info {
         std::string remote_ip;
         std::uint16_t remote_port;
@@ -91,7 +92,7 @@ namespace detail {
         p2p_host& operator=(const p2p_host& other) = delete;
         p2p_host(p2p_host&& other) noexcept = default;
         p2p_host& operator=(p2p_host&& other) noexcept = default;
-        ~p2p_host() noexcept;
+        // ~p2p_host() noexcept;
 
         [[nodiscard]] std::vector<p2p_client_id> get_clients() const;
         [[nodiscard]] p2p_peer_info get_client_info(const p2p_client_id id) const;
@@ -116,7 +117,7 @@ namespace detail {
         p2p_client& operator=(const p2p_client& other) = delete;
         p2p_client(p2p_client&& other) noexcept = default;
         p2p_client& operator=(p2p_client&& other) noexcept = default;
-        ~p2p_client() noexcept;
+        // ~p2p_client() noexcept;
 
         [[nodiscard]] p2p_peer_info get_host_info() const;
         void send(const std::vector<std::uint8_t>& payload);
@@ -168,6 +169,7 @@ private:
     std::unique_ptr<detail::file_watcher> _daw_temp_project_watcher;
 };
 
+/// @brief
 struct p2p_host_session {
     p2p_host_session() = delete;
     p2p_host_session(
@@ -198,6 +200,7 @@ private:
     local_session _local_session;
 };
 
+/// @brief
 struct p2p_client_session {
     p2p_client_session() = delete;
     p2p_client_session(

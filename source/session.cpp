@@ -128,4 +128,5 @@ void local_session::redo()
     _container.redo();
 }
 
+
 }

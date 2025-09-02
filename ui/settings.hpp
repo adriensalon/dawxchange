@@ -13,6 +13,8 @@ struct als_settings {
 struct settings {
     std::filesystem::path collection_directory_path;
     std::vector<daw_settings> daws_settings;
+    std::chrono::milliseconds p2p_natpmp_query_delay { 3000 };
+    std::chrono::milliseconds p2p_upnp_query_delay { 3000 };
     als_settings ableton_settings;
 };
 
