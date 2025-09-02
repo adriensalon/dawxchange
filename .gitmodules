@@ -6,3 +6,6 @@
 	path = external/fmtdxc
 	url = https://github.com/adriensalon/fmtdxc.git
 	branch = master
+[submodule "external/natp2p"]
+	path = external/natp2p
+	url = https://github.com/adriensalon/natp2p.git
