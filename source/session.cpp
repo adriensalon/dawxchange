@@ -4,7 +4,7 @@
 
 namespace rtdxc {
 
-session::session(
+local_session::local_session(
     const daw_version version,
     const std::filesystem::path& daw_path,
     const std::filesystem::path& container_path,
@@ -72,58 +72,58 @@ session::session(
     // });
 }
 
-bool session::can_commit() const
+bool local_session::can_commit() const
 {
     return true; // TODO
 }
 
-bool session::can_undo() const
+bool local_session::can_undo() const
 {
     return _container.can_undo();
 }
 
-bool session::can_redo() const
+bool local_session::can_redo() const
 {
     return _container.can_redo();
 }
 
-std::size_t session::get_applied_count() const
+std::size_t local_session::get_applied_count() const
 {
     return _container.get_applied_count();
 }
 
-const std::vector<fmtdxc::project_commit>& session::get_commits() const
+const std::vector<fmtdxc::project_commit>& local_session::get_commits() const
 {
     return _container.get_commits();
 }
 
-const fmtdxc::sparse_project& session::get_diff_from_last_commit() const
+const fmtdxc::sparse_project& local_session::get_diff_from_last_commit() const
 {
     return _next_diff;
 }
 
-const fmtdxc::project_info& session::get_info() const
+const fmtdxc::project_info& local_session::get_info() const
 {
     // fmtdxc::scan_project(_container, _info); deplacer vers file watcher cb ?
     return _info;
 }
 
-const std::filesystem::path& session::get_temp_directory_path() const
+const std::filesystem::path& local_session::get_temp_directory_path() const
 {
     return _temp_directory_path;
 }
 
-void session::commit(const std::string& message)
+void local_session::commit(const std::string& message)
 {
     _container.commit(message, _next_proj);
 }
 
-void session::undo()
+void local_session::undo()
 {
     _container.undo();
 }
 
-void session::redo()
+void local_session::redo()
 {
     _container.redo();
 }

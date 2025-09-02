@@ -27,8 +27,6 @@
 #include "core/teelog.hpp"
 #include "settings.hpp"
 
-static rtdxc::runtime _runtime;
-
 // Data
 static VkAllocationCallbacks* g_Allocator = nullptr;
 static VkInstance g_Instance = VK_NULL_HANDLE;

@@ -31,7 +31,7 @@ void draw_controls()
 
             if (global_selected_container_path) {
                 if (ImGui::Button("Open")) {
-                    global_session = std::make_unique<rtdxc::session>(
+                    global_session = std::make_unique<rtdxc::local_session>(
                         global_settings.daws_settings[global_selected_daw_index].version,
                         global_settings.daws_settings[global_selected_daw_index].executable_path,
                         global_selected_container_path.value(), []() {
