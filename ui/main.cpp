@@ -395,10 +395,11 @@ int main(int, char**)
     // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle& style = ImGui::GetStyle();
@@ -469,9 +470,11 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        draw_settings();
-        draw_controls();
-        draw_collection();
+        draw_initial_settings_modals();
+        if (global_initial_settings_defined) {
+            draw_controls();
+            draw_collection();
+        }
 
         ImGui::Render();
 

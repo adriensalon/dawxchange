@@ -422,6 +422,7 @@ void process::save_daw_project_as(const std::filesystem::path& project)
         PostMessageW(_saveas_dialog, WM_KEYDOWN, VK_RETURN, 0);
         PostMessageW(_saveas_dialog, WM_KEYUP, VK_RETURN, 0);
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
 }
 
 }

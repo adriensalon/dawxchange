@@ -1,5 +1,8 @@
 #include "teelog.hpp"
 
+#include <iostream>
+#include <streambuf>
+
 std::vector<std::string> teelog_ring::snapshot() const
 {
     std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(lock_mutex));

@@ -139,7 +139,7 @@ struct local_session {
     local_session(
         const daw_version version,
         const std::filesystem::path& daw_path,
-        const std::filesystem::path& container_path,
+        const std::optional<std::filesystem::path>& container_path,
         const std::function<std::optional<std::filesystem::path>()>& exit_callback);
     local_session(const local_session& other) = delete;
     local_session& operator=(const local_session& other) = delete;
@@ -175,7 +175,7 @@ struct p2p_host_session {
     p2p_host_session(
         const daw_version version,
         const std::filesystem::path& daw_path,
-        const std::filesystem::path& container_path,
+        const std::optional<std::filesystem::path>& container_path,
         const std::function<std::optional<std::filesystem::path>()>& exit_callback,
         const natp2p::endpoint_lease& host_endpoint);
     p2p_host_session(const p2p_host_session& other) = delete;
@@ -206,7 +206,6 @@ struct p2p_client_session {
     p2p_client_session(
         const daw_version version,
         const std::filesystem::path& daw_path,
-        const std::filesystem::path& container_path,
         const std::function<std::optional<std::filesystem::path>()>& exit_callback,
         const natp2p::endpoint_data& host_endpoint);
     p2p_client_session(const p2p_client_session& other) = delete;

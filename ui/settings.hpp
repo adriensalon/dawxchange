@@ -18,10 +18,12 @@ struct settings {
     als_settings ableton_settings;
 };
 
-inline static bool global_show_settings {};
-inline static unsigned int global_selected_settings_tab {};
-inline static settings global_settings {};
+// inline bool global_show_settings {};
+// inline unsigned int global_selected_settings_tab {};
+inline settings global_settings {};
+inline bool global_initial_settings_defined = false;
 
 void save_settings();
 void load_settings();
 void draw_settings();
+void draw_initial_settings_modals();

@@ -130,7 +130,7 @@ void draw_initial_collection_directory_modal()
 
 void draw_initial_daw_program_modal()
 {
-    const float width = 480.0f; // fixed modal width
+    const float width = 400.0f; // fixed modal width
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
@@ -228,25 +228,24 @@ void draw_initial_daw_program_modal()
     }
 }
 
-void draw_settings()
+void draw_initial_settings_modals()
 {
-    if (!std::filesystem::is_directory(global_settings.collection_directory_path)) {
-        ImGui::OpenPopup(select_collection_directory_modal_id);
-    } else if (global_settings.daws_settings.empty()) {
-        ImGui::OpenPopup(select_daw_program_modal_id);
+    if (!global_initial_settings_defined) {
+        if (!std::filesystem::is_directory(global_settings.collection_directory_path)) {
+            ImGui::OpenPopup(select_collection_directory_modal_id);
+        } else if (global_settings.daws_settings.empty()) {
+            ImGui::OpenPopup(select_daw_program_modal_id);
+        } else {
+            global_initial_settings_defined = true;
+        }
     }
+
     draw_initial_collection_directory_modal();
     draw_initial_daw_program_modal();
-    //
+}
 
-    if (global_settings.daws_settings.empty()) {
-        // special modal
-        // auto ok = open_file_dialog({
-        //     { "Ableton Live", { ".als" } },
-        //     { "FL Studio", { ".flp" } },
-        // }, std::filesystem::current_path());
-    }
-
+void draw_settings()
+{
     if (ImGui::Begin("Settings")) {
     }
     ImGui::End();
