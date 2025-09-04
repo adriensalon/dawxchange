@@ -1,6 +1,9 @@
 #include <rtdxc/rtdxc.hpp>
 
+// clang-format off
 #include <windows.h>
+#include <processthreadsapi.h>
+// clang-format on
 
 #include <atomic>
 #include <mutex>
@@ -61,14 +64,39 @@ namespace detail {
                 on_remove_ = std::move(cb);
             }
 
+            // void stop()
+            // {
+            //     bool expected = true;
+            //     if (_is_running.compare_exchange_strong(expected, false)) {
+            //         if (_handle != INVALID_HANDLE_VALUE) {
+            //             ::CloseHandle(_handle); // unblocks ReadDirectoryChangesW
+            //             _handle = INVALID_HANDLE_VALUE;
+            //         }
+            //         if (_worker.joinable())
+            //             _worker.join();
+            //     }
+            // }
+
             void stop()
             {
                 bool expected = true;
                 if (_is_running.compare_exchange_strong(expected, false)) {
+
+                    // 1) Cancel the synchronous ReadDirectoryChangesW running on _worker
+                    if (_worker.joinable()) {
+                        // native_handle() is a HANDLE on MSVC's std::thread
+                        HANDLE th = _worker.native_handle();
+                        // Best-effort cancel; it's okay if it fails (e.g., nothing pending yet)
+                        ::CancelSynchronousIo(th);
+                    }
+
+                    // 2) Close the directory handle (extra safety; after cancel succeeds, RDCW will exit)
                     if (_handle != INVALID_HANDLE_VALUE) {
-                        ::CloseHandle(_handle); // unblocks ReadDirectoryChangesW
+                        ::CloseHandle(_handle);
                         _handle = INVALID_HANDLE_VALUE;
                     }
+
+                    // 3) Join worker
                     if (_worker.joinable())
                         _worker.join();
                 }

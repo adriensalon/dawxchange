@@ -54,14 +54,14 @@ void draw_import_control()
 
 void draw_export_control()
 {
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::BeginDisabled();
     }
     if (ImGui::Button(IMGUID("Export"))) {
         // open file dialog with filter for each daw
         // that s it
     }
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
@@ -117,12 +117,12 @@ void draw_new_as_p2p_host_control()
 
 void draw_new_from_template_control()
 {
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::BeginDisabled();
     }
     if (ImGui::Button(IMGUID("New (from template)"))) {
     }
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
@@ -130,18 +130,19 @@ void draw_new_from_template_control()
 
 void draw_open_control()
 {
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::BeginDisabled();
     }
     if (ImGui::Button(IMGUID("Open"))) {
+        const std::filesystem::path _selected_container_path = global_containers[global_selected_container_index.value()].first;
         global_session = std::make_unique<rtdxc::session>(rtdxc::local_session(
             global_settings.daws_settings[global_selected_daw_index].version,
             global_settings.daws_settings[global_selected_daw_index].executable_path,
-            global_selected_container_path.value(), []() {
-                return global_selected_container_path.value();
+            _selected_container_path, [_selected_container_path]() {
+                return _selected_container_path;
             }));
     }
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
@@ -149,12 +150,12 @@ void draw_open_control()
 
 void draw_open_as_p2p_host_control()
 {
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::BeginDisabled();
     }
     if (ImGui::Button(IMGUID("Open (as P2P host)"))) {
     }
-    if (!global_selected_container_path) {
+    if (!global_selected_container_index) {
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
@@ -278,7 +279,7 @@ void draw_daw_loading_modal()
 
     if (ImGui::BeginPopupModal(daw_loading_modal_id, nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
 
-        const std::string _text = global_settings.daws_settings[global_selected_daw_index].executable_path.filename().replace_extension("").string().append(" is loading...");
+        const std::string _text = global_settings.daws_settings[global_selected_daw_index].executable_path.filename().replace_extension("").string().append(" is starting...");
         const float _wrap_width = _modal_width - ImGui::GetStyle().WindowPadding.x * 2.f;
         ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + _wrap_width);
         ImGui::TextUnformatted(_text.c_str());
