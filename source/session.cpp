@@ -1,8 +1,70 @@
 #include <rtdxc/rtdxc.hpp>
 
+#include <enet/enet.h>
+
 #include <fstream>
+#include <thread>
 
 namespace rtdxc {
+namespace {
+    struct enet_lib {
+        enet_lib() { enet_initialize(); }
+        ~enet_lib() { enet_deinitialize(); }
+    };
+
+    enum struct wire_type : std::uint8_t {
+        join = 1, // C->H : request to join
+        join_container = 2, // H->C : full project_container blob (on join)
+        commit_request = 3, // C->H : client requests to commit (payload = message + optional diff)
+        commit_broadcast = 4, // H->* : authoritative commit from host (payload = project_commit or minimal wire form)
+        undo_broadcast = 7, // H->* : host performed undo
+        redo_broadcast = 8, // H->* : host performed redo
+        ping = 9, // keepalive if you want
+    };
+
+    struct wire_peer {
+        std::string username;
+        daw_version version;
+
+        template <typename archive_t>
+        void serialize(archive_t& archive)
+        {
+            archive(username);
+            archive(version);
+        }
+    };
+
+    struct wire_join {
+        wire_peer;
+
+        template <typename archive_t>
+        void serialize(archive_t& archive)
+        {
+            archive(version);
+        }
+    };
+
+    struct wire_join_container {
+        fmtdxc::project_container container;
+
+        template <typename archive_t>
+        void serialize(archive_t& archive)
+        {
+            archive(container);
+        }
+    };
+
+    struct wire_commit_request {
+        fmtdxc::project_commit commit;
+        
+        template <typename archive_t>
+        void serialize(archive_t& archive)
+        {
+            archive(commit);
+        }
+    };
+
+}
 
 local_session::local_session(
     const daw_version version,
@@ -60,15 +122,13 @@ local_session::local_session(
             if constexpr (std::is_same_v<daw_type_t, fmtals::version>) {
                 fmtals::project _als_project = detail::convert_to_als(_container.get_project());
                 std::ofstream _als_stream(_daw_temp_project_path, std::ios::binary);
-                
+
                 // TODO export in parent folder Project
                 fmtals::export_project(_als_stream, _als_project, _version);
             }
         },
             _daw_version);
     }
-
-    
 
     _daw_process = std::make_unique<detail::process>(daw_path);
 
@@ -88,20 +148,25 @@ local_session::local_session(
 
     // _daw_temp_project_watcher = std::make_unique<detail::file_watcher>(_daw_temp_project_path);
     _daw_temp_project_watcher = std::make_unique<detail::file_watcher>(_temp_directory_path / "dawxchange Project" / "dawxchange.als");
-    _daw_temp_project_watcher->on_modification([this](const std::filesystem::path&) {
-        // std::visit([&](const auto _version) {
-        //     using daw_type_t = std::decay_t<decltype(_version)>;
+    std::filesystem::path _ok = _temp_directory_path;
+    _daw_temp_project_watcher->on_modification([this, _ok](const std::filesystem::path&) {
+        std::cout << _ok / "dawxchange Project" / "dawxchange.als" << std::endl;
 
-        //     // ableton
-        //     if constexpr (std::is_same_v<daw_type_t, fmtals::version>) {
-        //         std::ifstream _als_stream(_daw_temp_project_path, std::ios::binary);
-        //         fmtals::version _als_version;
-        //         fmtals::project _als_project;
-        //         fmtals::import_project(_als_stream, _als_project, _als_version);
-        //         _next_proj = detail::convert_from_als(_als_project);
-        //     }
-        // },
-        //     _daw_version);
+        std::visit([&](const auto _version) {
+            using daw_type_t = std::decay_t<decltype(_version)>;
+
+            // ableton
+            if constexpr (std::is_same_v<daw_type_t, fmtals::version>) {
+                std::cout << _ok / "dawxchange Project" / "dawxchange.als" << std::endl;
+                std::ifstream _als_stream(_ok / "dawxchange Project" / "dawxchange.als", std::ios::binary);
+                std::cout << _als_stream.is_open() << std::endl;
+                fmtals::version _als_version;
+                fmtals::project _als_project;
+                fmtals::import_project(_als_stream, _als_project, _als_version);
+                // _next_proj = detail::convert_from_als(_als_project);
+            }
+        },
+            _daw_version);
 
         // fmtdxc::diff(_container.get_project(), _next_proj, _next_diff);
         std::cout << "modified ::::) " << std::endl;
@@ -110,7 +175,7 @@ local_session::local_session(
 
 bool local_session::can_commit() const
 {
-    return true; // TODO
+    return true; // TODO is next_dif empty
 }
 
 bool local_session::can_undo() const

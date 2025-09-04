@@ -213,17 +213,12 @@ struct p2p_client_session {
     p2p_client_session(p2p_client_session&& other) = default;
     p2p_client_session& operator=(p2p_client_session&& other) = default;
 
-    [[nodiscard]] bool can_commit() const;
-    [[nodiscard]] bool can_undo() const;
-    [[nodiscard]] bool can_redo() const;
     [[nodiscard]] std::size_t get_applied_count() const;
     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
     [[nodiscard]] const fmtdxc::project_info& get_info() const;
     [[nodiscard]] const std::filesystem::path& get_temp_directory_path() const;
     void commit(const std::string& message);
-    void undo();
-    void redo();
 
 private:
     detail::p2p_client _client;

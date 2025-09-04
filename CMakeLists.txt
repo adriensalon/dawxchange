@@ -19,6 +19,7 @@ add_library(rtdxc STATIC ${rtdxc_source})
 set_target_properties(rtdxc PROPERTIES CXX_STANDARD 17)
 target_include_directories(rtdxc PUBLIC include)
 target_include_directories(rtdxc PRIVATE ${CEREAL_INCLUDE_DIR})
+target_include_directories(rtdxc PRIVATE external/enet/include)
 target_link_libraries(rtdxc PUBLIC fmtals fmtdxc natp2p enet)
 
 # tools
