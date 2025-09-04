@@ -35,7 +35,7 @@ namespace {
     };
 
     struct wire_join {
-        wire_peer;
+        // wire_peer;
 
         template <typename archive_t>
         void serialize(archive_t& archive)
