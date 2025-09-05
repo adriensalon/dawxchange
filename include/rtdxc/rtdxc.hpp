@@ -152,7 +152,6 @@ struct local_session {
     [[nodiscard]] std::size_t get_applied_count() const;
     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
-    [[nodiscard]] const fmtdxc::project_info& get_info() const;
     [[nodiscard]] const std::filesystem::path& get_temp_directory_path() const;
     void commit(const std::string& message);
     void undo();
@@ -162,7 +161,6 @@ private:
     daw_version _daw_version;
     std::filesystem::path _temp_directory_path;
     fmtdxc::project_container _container;
-    fmtdxc::project_info _info;
     fmtdxc::sparse_project _next_diff; // for ui
     fmtdxc::project _next_proj;
     std::unique_ptr<detail::process> _daw_process;

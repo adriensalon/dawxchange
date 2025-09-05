@@ -203,12 +203,6 @@ const fmtdxc::sparse_project& local_session::get_diff_from_last_commit() const
     return _next_diff;
 }
 
-const fmtdxc::project_info& local_session::get_info() const
-{
-    // fmtdxc::scan_project(_container, _info); deplacer vers file watcher cb ?
-    return _info;
-}
-
 const std::filesystem::path& local_session::get_temp_directory_path() const
 {
     return _temp_directory_path;
