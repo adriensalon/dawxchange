@@ -41,3 +41,8 @@ if(RTDXC_BUILD_UI)
     set_target_properties(dawxchange PROPERTIES CXX_STANDARD 17)
     target_link_libraries(dawxchange PRIVATE rtdxc imgui)
 endif()
+
+# dev
+if(IS_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/dev)
+    add_subdirectory(dev)
+endif()

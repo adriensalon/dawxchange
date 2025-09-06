@@ -446,6 +446,18 @@ int main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf");
     //IM_ASSERT(font != nullptr);
 
+    // HICON hIcon = (HICON)LoadImage(
+    //     NULL, // no instance handle
+    //     "C:\\Users\\adri\\Desktop\\dxcixon.ico",
+    //     IMAGE_ICON, // we want an icon
+    //     32, 32, // desired size
+    //     LR_LOADFROMFILE // load from file
+    // );
+
+    // // Use it for the window
+    // SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+    // SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+
     load_settings();
     teelog_ring _teelog_ring;
     teelog_install(log_sink, &_teelog_ring);
