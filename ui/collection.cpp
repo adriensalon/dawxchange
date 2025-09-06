@@ -2,17 +2,19 @@
 #include "core/imguid.hpp"
 #include "settings.hpp"
 
+#if defined(_WIN32)
 #include <windows.h>
+#endif
 
 #include <imgui.h>
 
+#include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <fstream>
 
 namespace {
 
-static std::unique_ptr<rtdxc::detail::directory_watcher> collection_watcher = {}; // prevents from closing process:::::
+static std::unique_ptr<rtdxc::detail::directory_watcher> collection_watcher = {};
 static std::filesystem::path last_collection_directory_path = {};
 
 enum struct collection_columns {
@@ -20,6 +22,22 @@ enum struct collection_columns {
     created_on,
     modified_on
 };
+
+#if defined(_WIN32)
+[[nodiscard]] static std::chrono::system_clock::time_point win32_filetime_to_time_point(const FILETIME& ft)
+{
+    ULARGE_INTEGER _ull;
+    _ull.LowPart = ft.dwLowDateTime;
+    _ull.HighPart = ft.dwHighDateTime;
+    static const unsigned long long _epoch_diff = 116444736000000000ULL;
+    const unsigned long long _ticks = _ull.QuadPart - _epoch_diff;
+
+    return std::chrono::system_clock::time_point {
+        std::chrono::duration_cast<std::chrono::system_clock::duration>(
+            std::chrono::nanoseconds(_ticks * 100))
+    };
+}
+#endif
 
 [[nodiscard]] static std::string format_time_point(const std::chrono::time_point<std::chrono::system_clock>& time_point)
 {
@@ -74,26 +92,6 @@ enum struct collection_columns {
     return (_a_index - _b_index);
 }
 
-[[nodiscard]] static std::chrono::system_clock::time_point win32_filetime_to_time_point(const FILETIME& ft)
-{
-    // FILETIME: 100ns ticks since 1601-01-01 UTC
-    ULARGE_INTEGER ull;
-    ull.LowPart = ft.dwLowDateTime;
-    ull.HighPart = ft.dwHighDateTime;
-
-    // Difference between 1601-01-01 and 1970-01-01 in 100ns units
-    static const unsigned long long EPOCH_DIFF = 116444736000000000ULL;
-
-    // Convert to 100ns intervals since Unix epoch
-    unsigned long long ticks = ull.QuadPart - EPOCH_DIFF;
-
-    // Now to chrono::system_clock::time_point
-    return std::chrono::system_clock::time_point {
-        std::chrono::duration_cast<std::chrono::system_clock::duration>(
-            std::chrono::nanoseconds(ticks * 100))
-    };
-}
-
 void scan_project(const std::filesystem::path& container_path, project_info& info)
 {
     fmtdxc::version _version;
@@ -103,13 +101,12 @@ void scan_project(const std::filesystem::path& container_path, project_info& inf
     info.commits = _container.get_commits();
     info.applied = _container.get_applied_count();
 
-#ifdef _WIN32
+#if defined(_WIN32)
     WIN32_FILE_ATTRIBUTE_DATA _file_attribute_data;
     if (GetFileAttributesExW(container_path.c_str(), GetFileExInfoStandard, &_file_attribute_data)) {
         info.created_on = win32_filetime_to_time_point(_file_attribute_data.ftCreationTime);
         info.modified_on = win32_filetime_to_time_point(_file_attribute_data.ftLastWriteTime);
     }
-
 #endif
 }
 
@@ -248,4 +245,6 @@ void draw_collection()
     }
 
     ImGui::End();
+
+    ImGui::ShowDemoWindow();
 }

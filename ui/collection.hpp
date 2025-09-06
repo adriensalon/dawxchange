@@ -9,7 +9,7 @@ struct project_info {
     std::size_t applied;
 };
 
-inline std::optional<unsigned int> global_selected_container_index = {};
+inline std::optional<std::size_t> global_selected_container_index = {};
 inline std::vector<std::pair<std::filesystem::path, project_info>> global_containers = {};
 
 void draw_collection();
