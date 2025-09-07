@@ -142,7 +142,7 @@ local_session::local_session(
     //     std::optional<std::filesystem::path> _output_container_path = _exit_callback();
     //     if (_output_container_path) {
     //         std::ofstream _output_dxcc_stream(_output_container_path.value(), std::ios::binary);
-    //         fmtdxc::export_container(_output_dxcc_stream, _container, fmtdxc::version::alpha);
+    //         fmtdxc::export_project(_output_dxcc_stream, _container, fmtdxc::version::alpha);
     //     }
     // });
 

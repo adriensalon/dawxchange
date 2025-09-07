@@ -187,7 +187,6 @@ struct p2p_host_session {
     [[nodiscard]] std::size_t get_applied_count() const;
     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
-    [[nodiscard]] const fmtdxc::project_info& get_info() const;
     [[nodiscard]] const std::filesystem::path& get_temp_directory_path() const;
     void commit(const std::string& message);
     void undo();
@@ -214,7 +213,6 @@ struct p2p_client_session {
     [[nodiscard]] std::size_t get_applied_count() const;
     [[nodiscard]] const std::vector<fmtdxc::project_commit>& get_commits() const;
     [[nodiscard]] const fmtdxc::sparse_project& get_diff_from_last_commit() const;
-    [[nodiscard]] const fmtdxc::project_info& get_info() const;
     [[nodiscard]] const std::filesystem::path& get_temp_directory_path() const;
     void commit(const std::string& message);
 
